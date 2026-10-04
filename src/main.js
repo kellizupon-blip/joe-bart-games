@@ -8,15 +8,16 @@
 const DEFAULT_PROXIES = [
   {
     id: "drivemad",
-    title: "Drive Mad: Elmore Edition",
+    title: "Drive Mad: Original 3D",
     category: "Games",
     character: "Richard",
     accent: "#f97316",
     featured: true,
-    description: "Richard's favorite 4x4 physics truck balancing challenge. Accelerate, brake, tilt in midair, and conquer tricky obstacles without flipping over.",
+    description: "The authentic original 3D voxel physics monster truck game by Martin Magni with all 100 levels. Includes Switch Mirror for multiple sources.",
     url: "./games/drivemad/index.html",
-    iframe: '<iframe src="./games/drivemad/index.html" title="Drive Mad: Elmore Edition" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
-    tags: ["Drive Mad", "Games", "Physics", "Truck", "Racing", "Popular"]
+    originalUrl: "https://a.luminsdk.com/g/1791148304-s8-HyuYTCsFGsqB9NayM__pB29e8v3MlVjxrAcsV61M/selenite/drivemad/",
+    iframe: '<iframe src="./games/drivemad/index.html" title="Drive Mad: Original 3D" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock" class="w-full h-full border-0"></iframe>',
+    tags: ["Drive Mad", "Original", "3D", "Games", "Physics", "Truck", "Switch Mirror"]
   },
   {
     id: "duckduckgo",
@@ -94,6 +95,7 @@ let state = {
   searchQuery: '',
   favoritesOnly: false,
   activeProxy: null,
+  activeMirrorIndex: 0, // 0 = default, 1 = alternative mirror
   isPanicActive: false,
   isVaultOpen: false,
   isCloakModalOpen: false,
@@ -161,6 +163,7 @@ function toggleFavorite(id) {
 
 function launchProxy(proxy) {
   state.activeProxy = proxy;
+  state.activeMirrorIndex = 0;
   render();
 }
 
@@ -201,7 +204,9 @@ function openAboutBlank(proxy) {
     alert('Popups may be blocked. Please enable popups for stealth about:blank window.');
     return;
   }
-  const resolvedUrl = new URL(proxy.url, window.location.href).href;
+  const targetUrl = state.activeMirrorIndex === 1 && proxy.originalUrl ? proxy.originalUrl : proxy.url;
+  const resolvedUrl = new URL(targetUrl, window.location.href).href;
+
   win.document.title = 'Google Drive - My Drive';
   const link = win.document.createElement('link');
   link.rel = 'icon';
@@ -357,13 +362,13 @@ function render() {
             <div class="flex flex-wrap items-center gap-3">
               ${featured ? `
                 <button id="hero-play-featured" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-slate-950 bg-gradient-to-r from-orange-400 to-amber-300 hover:from-orange-300 hover:to-amber-200 rounded-lg shadow-md transition-all hover:scale-[1.02]">
-                  <span>🚚 Play Featured: ${featured.title}</span>
+                  <span>🚚 Play Original 3D: ${featured.title}</span>
                 </button>
               ` : ''}
               <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
                 <span class="text-cyan-400">⚡ Client-Side Proxy</span>
                 <span aria-hidden="true" class="text-slate-600">·</span>
-                <span class="text-orange-400">🛡️ Zero Tracking</span>
+                <span class="text-orange-400">🛡️ Zero Popups</span>
               </div>
             </div>
           </div>
@@ -482,6 +487,10 @@ function render() {
 
 // Render Iframe Proxy Player Viewport
 function renderProxyModalHtml(proxy) {
+  const hasMirror = Boolean(proxy.originalUrl);
+  const currentUrl = state.activeMirrorIndex === 1 && proxy.originalUrl ? proxy.originalUrl : proxy.url;
+  const isMirrorAlt = state.activeMirrorIndex === 1;
+
   return `
     <div id="proxy-modal-overlay" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col p-2 sm:p-4 overflow-y-auto">
       <div id="proxy-box" class="max-w-6xl w-full mx-auto bg-slate-900 border border-cyan-500/40 rounded-xl overflow-hidden shadow-2xl flex flex-col my-auto">
@@ -500,6 +509,17 @@ function renderProxyModalHtml(proxy) {
           </div>
 
           <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            ${hasMirror ? `
+              <button
+                id="btn-toggle-mirror"
+                title="Switch between Mirror 1 (Local 3D Fast) and Mirror 2 (External Proxy)"
+                class="px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${isMirrorAlt ? 'bg-orange-500 text-slate-950 shadow-md shadow-orange-500/20' : 'bg-slate-900 hover:bg-slate-800 text-orange-400 border border-orange-500/40'}"
+              >
+                <span>🔄 Switch Mirror</span>
+                <span class="text-[10px] px-1.5 py-0.2 bg-black/30 rounded">${isMirrorAlt ? 'Mirror 2: Web' : 'Mirror 1: Local'}</span>
+              </button>
+            ` : ''}
+
             <button id="btn-reload-proxy" title="Reload iframe" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-cyan-400 transition-colors">
               ⟳
             </button>
@@ -515,23 +535,27 @@ function renderProxyModalHtml(proxy) {
           </div>
         </div>
 
-        <!-- Sandboxed Iframe Viewport -->
-        <div class="relative w-full aspect-[4/3] sm:aspect-[16/10] max-h-[75vh] bg-slate-950">
+        <!-- Sandboxed Iframe Viewport: Block all popups -->
+        <div class="relative w-full aspect-[4/3] sm:aspect-[16/10] max-h-[78vh] bg-slate-950">
           <iframe
             id="active-proxy-frame"
-            src="${proxy.url}"
+            src="${currentUrl}"
             title="${proxy.title}"
             allow="fullscreen; clipboard-read; clipboard-write; autoplay"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock"
             class="w-full h-full border-0"
           ></iframe>
         </div>
 
-        <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
+        <div class="p-3 sm:p-4 bg-slate-900 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-400 font-mono">
           <div class="truncate max-w-xl">
-            <span class="text-cyan-400">Target URL:</span> ${proxy.url}
+            <span class="text-cyan-400 font-bold">Active URL:</span> <span id="proxy-current-url-display">${currentUrl}</span>
           </div>
-          <div>Elmore Void Proxy Engine Active</div>
+          <div class="flex items-center gap-3">
+            <span class="text-emerald-400 font-bold">🛡️ Anti-Popup Active</span>
+            <span aria-hidden="true" class="text-slate-700">·</span>
+            <span>Original 3D Engine · 100 Stages</span>
+          </div>
         </div>
       </div>
     </div>
@@ -784,10 +808,13 @@ function attachMainEvents() {
       state.activeProxy = null;
       render();
     });
+
     document.getElementById('btn-reload-proxy')?.addEventListener('click', () => {
       const frame = document.getElementById('active-proxy-frame');
-      if (frame) frame.src = state.activeProxy.url;
+      const targetUrl = state.activeMirrorIndex === 1 && state.activeProxy.originalUrl ? state.activeProxy.originalUrl : state.activeProxy.url;
+      if (frame) frame.src = targetUrl;
     });
+
     document.getElementById('btn-fs-proxy')?.addEventListener('click', () => {
       const box = document.getElementById('proxy-box');
       if (box) {
@@ -795,11 +822,19 @@ function attachMainEvents() {
         else document.exitFullscreen();
       }
     });
+
     document.getElementById('btn-cloak-current')?.addEventListener('click', () => {
       openAboutBlank(state.activeProxy);
     });
+
     document.getElementById('btn-fav-current')?.addEventListener('click', () => {
       toggleFavorite(state.activeProxy.id);
+    });
+
+    // Switch Mirror Toggle
+    document.getElementById('btn-toggle-mirror')?.addEventListener('click', () => {
+      state.activeMirrorIndex = state.activeMirrorIndex === 0 ? 1 : 0;
+      render();
     });
   }
 
