@@ -7,8 +7,8 @@
     "accent": "#f97316",
     "featured": true,
     "description": "Richard's favorite 4x4 physics truck balancing challenge. Accelerate, brake, tilt in midair, and conquer tricky obstacles without flipping over.",
-    "url": "https://a.luminsdk.com/g/1791148304-s8-HyuYTCsFGsqB9NayM__pB29e8v3MlVjxrAcsV61M/selenite/drivemad/",
-    "iframe": "<iframe src=\"https://a.luminsdk.com/g/1791148304-s8-HyuYTCsFGsqB9NayM__pB29e8v3MlVjxrAcsV61M/selenite/drivemad/\" title=\"Drive Mad: Elmore Edition\" allow=\"fullscreen\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-pointer-lock\" class=\"w-full h-full border-0\"></iframe>",
+    "url": "./games/drivemad/index.html",
+    "iframe": "<iframe src=\"./games/drivemad/index.html\" title=\"Drive Mad: Elmore Edition\" allow=\"fullscreen\" sandbox=\"allow-scripts allow-same-origin allow-forms\" class=\"w-full h-full border-0\"></iframe>",
     "tags": ["Drive Mad", "Games", "Physics", "Truck", "Racing", "Popular"]
   },
   {

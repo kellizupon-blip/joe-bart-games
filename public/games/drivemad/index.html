@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Drive Mad: Elmore Edition</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background: #090d1a;
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #canvas-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 1200px;
+      max-height: 800px;
+      background: #0f172a;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 180, 216, 0.2);
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* HUD overlay */
+    .hud {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .hud-badge {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hud-controls {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+    .btn-hud {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-hud:hover {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: #38bdf8;
+    }
+    /* Touch controls on mobile */
+    .touch-controls {
+      position: absolute;
+      bottom: 24px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .touch-group {
+      display: flex;
+      gap: 12px;
+      pointer-events: auto;
+    }
+    .touch-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 2px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .touch-btn:active {
+      background: #38bdf8;
+      color: #020617;
+      transform: scale(0.95);
+    }
+    /* Overlays for Win / Game Over */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 8, 20, 0.88);
+      backdrop-filter: blur(6px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      text-align: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #0f172a;
+      border: 2px solid #38bdf8;
+      padding: 32px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 50px rgba(56, 189, 248, 0.3);
+      max-width: 440px;
+      width: 100%;
+    }
+    .modal-title {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .modal-sub {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .btn-main {
+      width: 100%;
+      background: linear-gradient(135deg, #00b4d8, #38bdf8);
+      color: #020617;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: all 0.15s;
+    }
+    .btn-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+    }
+    .btn-secondary {
+      width: 100%;
+      background: #1e293b;
+      color: #f1f5f9;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Top HUD -->
+    <div class="hud">
+      <div class="hud-badge">
+        <span>🚚</span>
+        <span id="hudLevelText">LEVEL 1</span>
+      </div>
+      <div class="hud-controls">
+        <button id="btnMute" class="btn-hud" title="Toggle Sound">🔊</button>
+        <button id="btnRestart" class="btn-hud" title="Restart (R)">⟳ Restart</button>
+      </div>
+    </div>
+
+    <!-- Onscreen Touch Controls -->
+    <div class="touch-controls">
+      <div class="touch-group">
+        <button id="touchBrake" class="touch-btn" title="Reverse / Brake (A / Down)">◀</button>
+        <button id="touchGas" class="touch-btn" title="Accelerate / Gas (D / Up)">▶</button>
+      </div>
+      <div class="touch-group">
+        <button id="touchTiltLeft" class="touch-btn" title="Tilt Backward (Left)">↺</button>
+        <button id="touchTiltRight" class="touch-btn" title="Tilt Forward (Right)">↻</button>
+      </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="winModal" class="modal-overlay">
+      <div class="modal-card">
+        <div style="font-size: 48px; margin-bottom: 8px;">🏁</div>
+        <div class="modal-title" style="color: #38bdf8;">STAGE CLEARED!</div>
+        <div class="modal-sub" id="winStatsText">Smooth landing! Richard is impressed.</div>
+        <button id="btnNextLevel" class="btn-main">Next Stage →</button>
+        <button id="btnReplay" class="btn-secondary">Replay Stage</button>
+      </div>
+    </div>
+
+    <!-- Crash Modal -->
+    <div id="crashModal" class="modal-overlay">
+      <div class="modal-card" style="border-color: #f43f5e; box-shadow: 0 0 50px rgba(244, 63, 94, 0.3);">
+        <div style="font-size: 48px; margin-bottom: 8px;">💥</div>
+        <div class="modal-title" style="color: #f43f5e;">CRASHED!</div>
+        <div class="modal-sub">Watch the roof! The truck flipped over.</div>
+        <button id="btnTryAgain" class="btn-main" style="background: linear-gradient(135deg, #f43f5e, #fb7185); color: #fff;">Try Again (Space / R)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * DRIVE MAD: ELMORE EDITION
+     * High-Performance 2D Voxel Physics Engine
+     * Zero external dependencies - 100% same-origin & offline
+     */
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvas-container');
+
+    // Audio Synthesizer (Web Audio API)
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx && AudioCtx) {
+        audioCtx = new AudioCtx();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'engine') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(60, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.15);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'crash') {
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.35);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'win') {
+        // Joyful chord fanfare
+        [440, 554, 659, 880].forEach((freq, idx) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.frequency.value = freq;
+          g.gain.setValueAtTime(0.08, now + idx * 0.08);
+          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.4);
+          o.start(now + idx * 0.08);
+          o.stop(now + idx * 0.08 + 0.4);
+        });
+      }
+    }
+
+    // Resize handling
+    let width = 800;
+    let height = 500;
+    function resize() {
+      const rect = container.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Input state
+    const keys = {
+      gas: false,
+      brake: false,
+      tiltLeft: false,
+      tiltRight: false
+    };
+
+    window.addEventListener('keydown', (e) => {
+      initAudio();
+      if (['ArrowUp', 'KeyW', 'KeyD'].includes(e.code)) keys.gas = true;
+      if (['ArrowDown', 'KeyS', 'KeyA'].includes(e.code)) keys.brake = true;
+      if (['ArrowLeft'].includes(e.code)) keys.tiltLeft = true;
+      if (['ArrowRight'].includes(e.code)) keys.tiltRight = true;
+
+      if (e.code === 'KeyR' || (e.code === 'Space' && (gameState === 'CRASHED' || gameState === 'WON'))) {
+        if (gameState === 'WON') nextLevel();
+        else restartLevel();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (['ArrowUp', 'KeyW', 'KeyD'].includes(e.code)) keys.gas = false;
+      if (['ArrowDown', 'KeyS', 'KeyA'].includes(e.code)) keys.brake = false;
+      if (['ArrowLeft'].includes(e.code)) keys.tiltLeft = false;
+      if (['ArrowRight'].includes(e.code)) keys.tiltRight = false;
+    });
+
+    // Touch listeners
+    function bindTouch(btnId, keyName) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        initAudio();
+        keys[keyName] = true;
+      });
+      btn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keys[keyName] = false;
+      });
+      btn.addEventListener('mousedown', () => {
+        initAudio();
+        keys[keyName] = true;
+      });
+      btn.addEventListener('mouseup', () => { keys[keyName] = false; });
+      btn.addEventListener('mouseleave', () => { keys[keyName] = false; });
+    }
+    bindTouch('touchGas', 'gas');
+    bindTouch('touchBrake', 'brake');
+    bindTouch('touchTiltLeft', 'tiltLeft');
+    bindTouch('touchTiltRight', 'tiltRight');
+
+    // UI Buttons
+    document.getElementById('btnRestart').addEventListener('click', restartLevel);
+    document.getElementById('btnTryAgain').addEventListener('click', restartLevel);
+    document.getElementById('btnReplay').addEventListener('click', restartLevel);
+    document.getElementById('btnNextLevel').addEventListener('click', nextLevel);
+    document.getElementById('btnMute').addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      document.getElementById('btnMute').innerText = soundEnabled ? '🔊' : '🔇';
+    });
+
+    // LEVELS DATA
+    const LEVELS = [
+      {
+        name: "Stage 1: First Drive",
+        truckX: 100,
+        truckY: 340,
+        finishX: 1400,
+        terrain: [
+          { x: 0, y: 400, w: 400, h: 80 },
+          { x: 400, y: 400, w: 300, h: 80, slope: 40 },
+          { x: 700, y: 440, w: 400, h: 80 },
+          { x: 1100, y: 440, w: 500, h: 80 }
+        ]
+      },
+      {
+        name: "Stage 2: Speed Bumps",
+        truckX: 100,
+        truckY: 340,
+        finishX: 1600,
+        terrain: [
+          { x: 0, y: 400, w: 300, h: 80 },
+          { x: 300, y: 400, w: 80, h: 80, bump: true },
+          { x: 380, y: 400, w: 120, h: 80 },
+          { x: 500, y: 400, w: 90, h: 80, bump: true },
+          { x: 590, y: 400, w: 200, h: 80 },
+          { x: 790, y: 400, w: 110, h: 80, bump: true },
+          { x: 900, y: 400, w: 800, h: 80 }
+        ]
+      },
+      {
+        name: "Stage 3: The Ramp Jump",
+        truckX: 100,
+        truckY: 340,
+        finishX: 1700,
+        terrain: [
+          { x: 0, y: 400, w: 400, h: 80 },
+          { x: 400, y: 400, w: 260, h: 80, slope: -70 }, // Ramp up
+          // Gap from 660 to 940
+          { x: 940, y: 450, w: 900, h: 80 } // Landing pad
+        ]
+      },
+      {
+        name: "Stage 4: Elmore Stairs",
+        truckX: 100,
+        truckY: 340,
+        finishX: 1600,
+        terrain: [
+          { x: 0, y: 400, w: 300, h: 80 },
+          { x: 300, y: 375, w: 120, h: 105 },
+          { x: 420, y: 350, w: 120, h: 130 },
+          { x: 540, y: 325, w: 120, h: 155 },
+          { x: 660, y: 300, w: 300, h: 180 },
+          { x: 960, y: 350, w: 200, h: 130 },
+          { x: 1160, y: 400, w: 600, h: 80 }
+        ]
+      },
+      {
+        name: "Stage 5: The Loop & Bridge",
+        truckX: 100,
+        truckY: 340,
+        finishX: 1900,
+        terrain: [
+          { x: 0, y: 400, w: 350, h: 80 },
+          { x: 350, y: 400, w: 200, h: 80, slope: -90 },
+          // Gap
+          { x: 700, y: 360, w: 300, h: 40, bridge: true },
+          // Gap
+          { x: 1150, y: 400, w: 250, h: 80, slope: 40 },
+          { x: 1400, y: 440, w: 700, h: 80 }
+        ]
+      }
+    ];
+
+    let currentLevelIdx = 0;
+    let gameState = 'PLAYING'; // 'PLAYING', 'CRASHED', 'WON'
+
+    // TRUCK PHYSICS ENTITY
+    class Truck {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = 0;
+        this.vy = 0;
+        this.angle = 0;
+        this.angVel = 0;
+
+        // Chassis dimensions
+        this.width = 64;
+        this.height = 24;
+
+        // Wheels
+        this.wheelRadius = 14;
+        this.wheelOffset = 22;
+
+        this.rearWheel = { x: x - this.wheelOffset, y: y + 16, vx: 0, vy: 0, grounded: false, rot: 0 };
+        this.frontWheel = { x: x + this.wheelOffset, y: y + 16, vx: 0, vy: 0, grounded: false, rot: 0 };
+
+        this.particles = [];
+        this.crashed = false;
+        this.voxels = []; // Shatter pieces on crash
+      }
+
+      update(terrain, dt) {
+        if (this.crashed) {
+          // Update crash voxels
+          this.voxels.forEach(v => {
+            v.x += v.vx;
+            v.y += v.vy;
+            v.vy += 0.4;
+            v.rot += v.vrot;
+          });
+          return;
+        }
+
+        const gravity = 0.45;
+        this.vy += gravity;
+
+        // Apply Player Input
+        const enginePower = 0.55;
+        const tiltTorque = 0.0035;
+
+        if (keys.gas) {
+          if (this.rearWheel.grounded || this.frontWheel.grounded) {
+            this.vx += Math.cos(this.angle) * enginePower;
+            this.vy += Math.sin(this.angle) * enginePower * 0.5;
+            this.rearWheel.rot += 0.3;
+            this.frontWheel.rot += 0.3;
+            playSound('engine');
+          } else {
+            // Air tilt
+            this.angVel += tiltTorque * 0.8;
+          }
+        }
+
+        if (keys.brake) {
+          if (this.rearWheel.grounded || this.frontWheel.grounded) {
+            this.vx -= Math.cos(this.angle) * enginePower * 0.7;
+            this.rearWheel.rot -= 0.2;
+            this.frontWheel.rot -= 0.2;
+          } else {
+            this.angVel -= tiltTorque * 0.8;
+          }
+        }
+
+        if (keys.tiltLeft) this.angVel -= tiltTorque;
+        if (keys.tiltRight) this.angVel += tiltTorque;
+
+        // Drag & Damping
+        this.vx *= 0.985;
+        this.vy *= 0.99;
+        this.angVel *= 0.94;
+
+        // Update Position & Angle
+        this.x += this.vx;
+        this.y += this.vy;
+        this.angle += this.angVel;
+
+        // Wheel positions relative to chassis
+        const cos = Math.cos(this.angle);
+        const sin = Math.sin(this.angle);
+
+        const targetRx = this.x - cos * this.wheelOffset + sin * 14;
+        const targetRy = this.y - sin * this.wheelOffset - cos * -14;
+
+        const targetFx = this.x + cos * this.wheelOffset + sin * 14;
+        const targetFy = this.y + sin * this.wheelOffset - cos * -14;
+
+        // Wheel physics spring simulation
+        this.simulateWheel(this.rearWheel, targetRx, targetRy, terrain);
+        this.simulateWheel(this.frontWheel, targetFx, targetFy, terrain);
+
+        // Ground Reaction forces from wheels to chassis
+        if (this.rearWheel.grounded && this.frontWheel.grounded) {
+          // Orient truck along wheel axis
+          const dx = this.frontWheel.x - this.rearWheel.x;
+          const dy = this.frontWheel.y - this.rearWheel.y;
+          const targetAngle = Math.atan2(dy, dx);
+          this.angle += (targetAngle - this.angle) * 0.2;
+        }
+
+        // Exhaust smoke particles
+        if (keys.gas && Math.random() < 0.4) {
+          this.particles.push({
+            x: this.x - cos * 32,
+            y: this.y - sin * 32,
+            vx: -cos * 2 + (Math.random() - 0.5),
+            vy: -sin * 2 - 1,
+            size: 4 + Math.random() * 4,
+            alpha: 0.7
+          });
+        }
+
+        // Check Roof Rollover Collision (Crash Detection)
+        const roofX = this.x - sin * 22;
+        const roofY = this.y - cos * 22;
+        if (this.checkPointTerrainCollision(roofX, roofY, terrain)) {
+          this.triggerCrash();
+        }
+
+        // Check if fallen below world
+        if (this.y > 700) {
+          this.triggerCrash();
+        }
+
+        // Update particles
+        this.particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.size += 0.2;
+          p.alpha -= 0.03;
+        });
+        this.particles = this.particles.filter(p => p.alpha > 0);
+      }
+
+      simulateWheel(wheel, targetX, targetY, terrain) {
+        wheel.x += (targetX - wheel.x) * 0.6;
+        wheel.y += (targetY - wheel.y) * 0.6;
+
+        wheel.grounded = false;
+
+        terrain.forEach(block => {
+          let groundY = block.y;
+          if (block.slope) {
+            const relX = (wheel.x - block.x) / block.w;
+            if (relX >= 0 && relX <= 1) {
+              groundY = block.y + relX * block.slope;
+            }
+          }
+          if (block.bump) {
+            const relX = (wheel.x - block.x) / block.w;
+            if (relX >= 0 && relX <= 1) {
+              groundY = block.y - Math.sin(relX * Math.PI) * 18;
+            }
+          }
+
+          if (wheel.x >= block.x - 5 && wheel.x <= block.x + block.w + 5) {
+            if (wheel.y + this.wheelRadius >= groundY && wheel.y - this.wheelRadius <= groundY + block.h) {
+              wheel.y = groundY - this.wheelRadius;
+              wheel.grounded = true;
+              this.vy *= 0.5;
+            }
+          }
+        });
+      }
+
+      checkPointTerrainCollision(px, py, terrain) {
+        for (let b of terrain) {
+          let top = b.y;
+          if (b.slope && px >= b.x && px <= b.x + b.w) {
+            top = b.y + ((px - b.x) / b.w) * b.slope;
+          }
+          if (px >= b.x && px <= b.x + b.w && py >= top && py <= top + b.h) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      triggerCrash() {
+        if (this.crashed) return;
+        this.crashed = true;
+        playSound('crash');
+
+        // Create voxel debris
+        const colors = ['#00b4d8', '#38bdf8', '#0284c7', '#0f172a', '#facc15', '#f43f5e'];
+        for (let i = 0; i < 24; i++) {
+          this.voxels.push({
+            x: this.x + (Math.random() - 0.5) * 40,
+            y: this.y + (Math.random() - 0.5) * 30,
+            vx: this.vx * 0.5 + (Math.random() - 0.5) * 10,
+            vy: this.vy * 0.5 - Math.random() * 8,
+            size: 6 + Math.random() * 6,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rot: Math.random() * Math.PI,
+            vrot: (Math.random() - 0.5) * 0.2
+          });
+        }
+        onGameCrash();
+      }
+
+      draw(ctx) {
+        // Draw exhaust smoke
+        this.particles.forEach(p => {
+          ctx.fillStyle = `rgba(200, 225, 255, ${p.alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        if (this.crashed) {
+          // Draw shattering voxels
+          this.voxels.forEach(v => {
+            ctx.save();
+            ctx.translate(v.x, v.y);
+            ctx.rotate(v.rot);
+            ctx.fillStyle = v.color;
+            ctx.fillRect(-v.size / 2, -v.size / 2, v.size, v.size);
+            ctx.strokeStyle = '#020617';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(-v.size / 2, -v.size / 2, v.size, v.size);
+            ctx.restore();
+          });
+          return;
+        }
+
+        // Draw Wheels
+        this.drawWheel(ctx, this.rearWheel.x, this.rearWheel.y, this.rearWheel.rot);
+        this.drawWheel(ctx, this.frontWheel.x, this.frontWheel.y, this.frontWheel.rot);
+
+        // Draw Chassis (Voxel Styled Monster 4x4 Truck)
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+
+        // Suspension links
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-this.wheelOffset, 6);
+        ctx.lineTo(-this.wheelOffset, 16);
+        ctx.moveTo(this.wheelOffset, 6);
+        ctx.lineTo(this.wheelOffset, 16);
+        ctx.stroke();
+
+        // Main Truck Body (Gumball Cyan Voxel)
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(-32, -6, 64, 18);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(-30, -8, 60, 16);
+
+        // Truck Cabin & Roof
+        ctx.fillStyle = '#00b4d8';
+        ctx.fillRect(-18, -24, 32, 18);
+
+        // Windshield (Black Glass)
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(4, -20, 8, 12);
+        ctx.fillRect(-14, -20, 14, 12);
+
+        // Driver Head (Richard Watterson Pink Ear silhouette)
+        ctx.fillStyle = '#f472b6';
+        ctx.beginPath();
+        ctx.arc(-4, -14, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Front Grille & Headlight (Yellow)
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(28, -2, 4, 6);
+
+        // Rear Spoiler / Bumper
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(-32, -12, 6, 8);
+
+        ctx.restore();
+      }
+
+      drawWheel(ctx, wx, wy, rot) {
+        ctx.save();
+        ctx.translate(wx, wy);
+        ctx.rotate(rot);
+
+        // Big Chunky Black Tire
+        ctx.fillStyle = '#090d1a';
+        ctx.beginPath();
+        ctx.arc(0, 0, this.wheelRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Deep Tread Marks
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 3;
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 3) {
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a) * 7, Math.sin(a) * 7);
+          ctx.lineTo(Math.cos(a) * (this.wheelRadius - 1), Math.sin(a) * (this.wheelRadius - 1));
+          ctx.stroke();
+        }
+
+        // Bright Yellow Rim
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.arc(0, 0, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+    }
+
+    // GAME CONTROLLER
+    let truck = null;
+    let cameraX = 0;
+    let currentLevel = LEVELS[0];
+
+    function loadLevel(idx) {
+      currentLevelIdx = idx % LEVELS.length;
+      currentLevel = LEVELS[currentLevelIdx];
+      truck = new Truck(currentLevel.truckX, currentLevel.truckY);
+      cameraX = truck.x - 200;
+      gameState = 'PLAYING';
+
+      document.getElementById('hudLevelText').innerText = `LEVEL ${currentLevelIdx + 1}: ${currentLevel.name.split(':')[1] || currentLevel.name}`;
+      document.getElementById('winModal').style.display = 'none';
+      document.getElementById('crashModal').style.display = 'none';
+    }
+
+    function restartLevel() {
+      loadLevel(currentLevelIdx);
+    }
+
+    function nextLevel() {
+      loadLevel(currentLevelIdx + 1);
+    }
+
+    function onGameCrash() {
+      gameState = 'CRASHED';
+      setTimeout(() => {
+        if (gameState === 'CRASHED') {
+          document.getElementById('crashModal').style.display = 'flex';
+        }
+      }, 700);
+    }
+
+    function onGameWin() {
+      gameState = 'WON';
+      playSound('win');
+      document.getElementById('winStatsText').innerText = `Stage ${currentLevelIdx + 1} completed without flipping!`;
+      document.getElementById('winModal').style.display = 'flex';
+    }
+
+    // MAIN LOOP
+    function loop() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Smooth Camera tracking truck
+      if (truck) {
+        const targetCamX = truck.x - width * 0.35;
+        cameraX += (targetCamX - cameraX) * 0.12;
+      }
+
+      // Parallax Background Sky
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
+      skyGrad.addColorStop(0, '#0c1a30');
+      skyGrad.addColorStop(0.6, '#0f2b48');
+      skyGrad.addColorStop(1, '#1b3b5f');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // Cartoon Elmore Clouds
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+      for (let i = 0; i < 6; i++) {
+        const cx = ((i * 350 - cameraX * 0.2) % (width + 400)) - 100;
+        const cy = 60 + (i % 3) * 40;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 35, 0, Math.PI * 2);
+        ctx.arc(cx + 25, cy - 10, 30, 0, Math.PI * 2);
+        ctx.arc(cx + 50, cy, 25, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.save();
+      ctx.translate(-cameraX, 0);
+
+      // Draw Terrain Blocks (Voxel Style)
+      currentLevel.terrain.forEach(block => {
+        // Block Top Surface
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        if (block.slope) {
+          ctx.moveTo(block.x, block.y);
+          ctx.lineTo(block.x + block.w, block.y + block.slope);
+          ctx.lineTo(block.x + block.w, block.y + block.slope + block.h);
+          ctx.lineTo(block.x, block.y + block.h);
+        } else if (block.bump) {
+          ctx.moveTo(block.x, block.y);
+          for (let bx = 0; bx <= block.w; bx += 10) {
+            const by = block.y - Math.sin((bx / block.w) * Math.PI) * 18;
+            ctx.lineTo(block.x + bx, by);
+          }
+          ctx.lineTo(block.x + block.w, block.y + block.h);
+          ctx.lineTo(block.x, block.y + block.h);
+        } else {
+          ctx.rect(block.x, block.y, block.w, block.h);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // 3D Block Edge / Grass Trim
+        ctx.fillStyle = '#38bdf8';
+        if (block.slope) {
+          ctx.fillRect(block.x, block.y, block.w, 5);
+        } else if (!block.bump) {
+          ctx.fillRect(block.x, block.y, block.w, 6);
+        }
+
+        // Subsurface Dirt & Grid
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(block.x, block.y + 6, block.w, block.h - 6);
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(block.x, block.y, block.w, block.h);
+      });
+
+      // Draw Checkered Finish Line
+      const fx = currentLevel.finishX;
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(fx, 260, 8, 140); // Pole
+
+      // Flag banner (Checkered)
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 5; c++) {
+          ctx.fillStyle = (r + c) % 2 === 0 ? '#ffffff' : '#020617';
+          ctx.fillRect(fx + 8 + c * 8, 260 + r * 8, 8, 8);
+        }
+      }
+
+      // Check Win Condition
+      if (gameState === 'PLAYING' && truck.x >= fx) {
+        onGameWin();
+      }
+
+      // Update & Draw Truck
+      if (truck) {
+        if (gameState === 'PLAYING') {
+          truck.update(currentLevel.terrain, 1);
+        }
+        truck.draw(ctx);
+      }
+
+      ctx.restore();
+
+      requestAnimationFrame(loop);
+    }
+
+    // Start Game
+    loadLevel(0);
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

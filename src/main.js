@@ -14,8 +14,8 @@ const DEFAULT_PROXIES = [
     accent: "#f97316",
     featured: true,
     description: "Richard's favorite 4x4 physics truck balancing challenge. Accelerate, brake, tilt in midair, and conquer tricky obstacles without flipping over.",
-    url: "https://a.luminsdk.com/g/1791148304-s8-HyuYTCsFGsqB9NayM__pB29e8v3MlVjxrAcsV61M/selenite/drivemad/",
-    iframe: '<iframe src="https://a.luminsdk.com/g/1791148304-s8-HyuYTCsFGsqB9NayM__pB29e8v3MlVjxrAcsV61M/selenite/drivemad/" title="Drive Mad: Elmore Edition" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock" class="w-full h-full border-0"></iframe>',
+    url: "./games/drivemad/index.html",
+    iframe: '<iframe src="./games/drivemad/index.html" title="Drive Mad: Elmore Edition" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
     tags: ["Drive Mad", "Games", "Physics", "Truck", "Racing", "Popular"]
   },
   {
@@ -201,6 +201,7 @@ function openAboutBlank(proxy) {
     alert('Popups may be blocked. Please enable popups for stealth about:blank window.');
     return;
   }
+  const resolvedUrl = new URL(proxy.url, window.location.href).href;
   win.document.title = 'Google Drive - My Drive';
   const link = win.document.createElement('link');
   link.rel = 'icon';
@@ -208,7 +209,7 @@ function openAboutBlank(proxy) {
   win.document.head.appendChild(link);
 
   const frame = win.document.createElement('iframe');
-  frame.src = proxy.url;
+  frame.src = resolvedUrl;
   frame.style.width = '100vw';
   frame.style.height = '100vh';
   frame.style.border = 'none';
@@ -520,7 +521,7 @@ function renderProxyModalHtml(proxy) {
             id="active-proxy-frame"
             src="${proxy.url}"
             title="${proxy.title}"
-            allow="fullscreen; clipboard-read; clipboard-write"
+            allow="fullscreen; clipboard-read; clipboard-write; autoplay"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             class="w-full h-full border-0"
           ></iframe>
