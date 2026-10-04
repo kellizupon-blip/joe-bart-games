@@ -7,12 +7,25 @@
 
 const DEFAULT_PROXIES = [
   {
+    id: "surron-wheelies",
+    title: "Sur-Ron Wheelie King: Stunt Syndicate",
+    category: "Games",
+    character: "Darwin",
+    accent: "#00b4d8",
+    featured: true,
+    image: "./assets/images/surron_wheelie_stunt_1791151626950.jpg",
+    description: "High-voltage electric dirt bike wheelie simulator! Balance the sweet spot, chain huge combos, and pull off Hand Drags, Knee Knocks, Seat Stands, and 12 O'Clock scrapes.",
+    url: "./games/surron-wheelies/index.html",
+    iframe: '<iframe src="./games/surron-wheelies/index.html" title="Sur-Ron Wheelie King: Stunt Syndicate" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Surron", "Wheelie", "Stunts", "Combos", "Hand Drag", "Knee Knock", "Seat Stand", "Games", "Physics"]
+  },
+  {
     id: "drivemad",
     title: "Drive Mad: Original 3D",
     category: "Games",
     character: "Richard",
     accent: "#f97316",
-    featured: true,
+    featured: false,
     description: "The authentic original 3D voxel physics monster truck game by Martin Magni with all 100 levels. Includes Switch Mirror for multiple sources.",
     url: "./games/drivemad/index.html",
     originalUrl: "https://a.luminsdk.com/g/1791148304-s8-HyuYTCsFGsqB9NayM__pB29e8v3MlVjxrAcsV61M/selenite/drivemad/",
@@ -90,17 +103,19 @@ const DEFAULT_PROXIES = [
 // App State
 let state = {
   proxies: DEFAULT_PROXIES,
-  favorites: JSON.parse(localStorage.getItem('gumball_proxy_favs') || '["drivemad", "duckduckgo"]'),
+  favorites: JSON.parse(localStorage.getItem('gumball_proxy_favs') || '["surron-wheelies", "drivemad"]'),
   activeCategory: 'all',
   searchQuery: '',
   favoritesOnly: false,
   activeProxy: null,
-  activeMirrorIndex: 0, // 0 = default, 1 = alternative mirror
+  activeMirrorIndex: 0,
   isPanicActive: false,
   isVaultOpen: false,
   isCloakModalOpen: false,
   currentCloak: localStorage.getItem('gumball_tab_cloak') || 'default',
-  customUrlInput: ''
+  customUrlInput: '',
+  bull33Genre: 'all',
+  visibleLimit: 36
 };
 
 // Character Badges
@@ -235,15 +250,19 @@ function getFilteredProxies() {
     if (state.activeCategory !== 'all' && p.category !== state.activeCategory) {
       return false;
     }
+    if (state.activeCategory === 'Bull-33 Games' && state.bull33Genre !== 'all') {
+      const hasGenre = (p.tags || []).some(t => t.toLowerCase() === state.bull33Genre.toLowerCase()) || (p.subCategory && p.subCategory.toLowerCase() === state.bull33Genre.toLowerCase());
+      if (!hasGenre) return false;
+    }
     if (state.favoritesOnly && !state.favorites.includes(p.id)) {
       return false;
     }
     if (state.searchQuery.trim()) {
       const q = state.searchQuery.toLowerCase();
       const matchTitle = p.title.toLowerCase().includes(q);
-      const matchDesc = p.description.toLowerCase().includes(q);
+      const matchDesc = (p.description || '').toLowerCase().includes(q);
       const matchCat = p.category.toLowerCase().includes(q);
-      const matchChar = p.character.toLowerCase().includes(q);
+      const matchChar = (p.character || '').toLowerCase().includes(q);
       const matchTags = p.tags && p.tags.some(t => t.toLowerCase().includes(q));
       if (!matchTitle && !matchDesc && !matchCat && !matchChar && !matchTags) {
         return false;
@@ -269,8 +288,9 @@ function render() {
   }
 
   const filtered = getFilteredProxies();
-  const categories = ['all', 'Games', 'Search', 'Reference', 'Math & Tools', 'Creative', 'Archive'];
-  const featured = state.proxies.find(p => p.featured) || state.proxies[0];
+  const categories = ['all', 'Bull-33 Games', 'Games', 'Search', 'Reference', 'Math & Tools', 'Creative', 'Archive'];
+  const surronGame = state.proxies.find(p => p.id === 'surron-wheelies') || state.proxies[0];
+  const drivemadGame = state.proxies.find(p => p.id === 'drivemad');
 
   root.innerHTML = `
     <div class="min-h-screen bg-[#050814] text-slate-100 flex flex-col font-sans">
@@ -312,13 +332,13 @@ function render() {
         <!-- Elmore Banner & Omnibar Hero Section -->
         <section class="relative overflow-hidden rounded-2xl border border-cyan-500/30 bg-slate-900/80 mb-10 shadow-2xl">
           <div class="absolute inset-0 pointer-events-none">
-            <img src="./assets/images/gumball_elmore_hero_1791147259529.jpg" alt="Elmore suburban horizon" class="w-full h-full object-cover object-center opacity-30 filter blur-[1px]" />
+            <img src="./assets/images/surron_wheelie_stunt_1791151626950.jpg" alt="Sur-Ron wheelie street stunt" class="w-full h-full object-cover object-center opacity-35 filter blur-[1px]" />
             <div class="absolute inset-0 bg-gradient-to-r from-[#050814] via-[#050814]/85 to-[#050814]/50"></div>
           </div>
 
           <div class="relative z-10 p-6 sm:p-10 lg:p-12 max-w-3xl">
             <div class="flex items-center gap-2 text-xs font-bold text-cyan-400 mb-3 tracking-widest uppercase">
-              <span>ELMORE VOID ROUTER · 100% UNBLOCKED</span>
+              <span>ELMORE VOID ROUTER · 100% UNBLOCKED & AD-FREE</span>
             </div>
 
             <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4 [text-wrap:balance]">
@@ -326,7 +346,7 @@ function render() {
             </h1>
 
             <p class="text-sm sm:text-base text-slate-300 leading-relaxed mb-6 max-w-2xl">
-              "Principal Brown said we couldn't surf outside the school filter. He forgot to check the Elmore Void proxy network." — Gumball Watterson
+              "Darwin modified a 72V Sur-Ron for street wheelies down Elmore Boulevard. Hand drags, knee knocks, seat stands, and zero homework." — Gumball
             </p>
 
             <!-- Omnibar Surf Form -->
@@ -360,11 +380,22 @@ function render() {
             </form>
 
             <div class="flex flex-wrap items-center gap-3">
-              ${featured ? `
-                <button id="hero-play-featured" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-slate-950 bg-gradient-to-r from-orange-400 to-amber-300 hover:from-orange-300 hover:to-amber-200 rounded-lg shadow-md transition-all hover:scale-[1.02]">
-                  <span>🚚 Play Original 3D: ${featured.title}</span>
+              ${surronGame ? `
+                <button id="hero-play-surron" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-300 to-emerald-300 hover:scale-[1.02] rounded-lg shadow-md transition-all">
+                  <span>⚡ Play Sur-Ron Wheelie King</span>
                 </button>
               ` : ''}
+
+              <button id="hero-play-bull33" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 rounded-lg shadow-md transition-all hover:scale-[1.02]">
+      <span>🐂 Bull-33 Games (225+)</span>
+    </button>
+
+              ${drivemadGame ? `
+                <button id="hero-play-drivemad" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-500/50 rounded-lg shadow-md transition-all">
+                  <span>🚚 Play Drive Mad 3D</span>
+                </button>
+              ` : ''}
+
               <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
                 <span class="text-cyan-400">⚡ Client-Side Proxy</span>
                 <span aria-hidden="true" class="text-slate-600">·</span>
@@ -380,7 +411,7 @@ function render() {
             <input
               type="text"
               id="filter-search-input"
-              placeholder="Search unblocked portals or games..."
+              placeholder="Search unblocked portals, games, or stunts..."
               value="${state.searchQuery}"
               class="w-full pl-4 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors"
             />
@@ -407,46 +438,87 @@ function render() {
           ` : ''}
         </div>
 
+        
+        ${state.activeCategory === 'Bull-33 Games' ? `
+          <div class="mb-6 flex flex-wrap items-center gap-2 p-3 bg-slate-900/60 border border-slate-800 rounded-xl">
+            <span class="text-xs font-mono font-bold text-slate-400 px-1">GENRES:</span>
+            <button data-bgenre="all" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'all' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">All Genres (225)</button>
+            <button data-bgenre="Action" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'Action' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Action</button>
+            <button data-bgenre="Fighting" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'Fighting' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Fighting</button>
+            <button data-bgenre="Adventure" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'Adventure' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Adventure</button>
+            <button data-bgenre="RPG" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'RPG' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">RPG</button>
+            <button data-bgenre="3A" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === '3A' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">3A</button>
+            <button data-bgenre="Shooting" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'Shooting' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Shooting</button>
+            <button data-bgenre="Indie" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'Indie' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Indie</button>
+            <button data-bgenre="Simulation" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'Simulation' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Simulation</button>
+            <button data-bgenre="Racing" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'Racing' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Racing</button>
+            <button data-bgenre="Sports" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'Sports' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Sports</button>
+            <button data-bgenre="Casual" class="btn-bull33-genre px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${state.bull33Genre === 'Casual' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">Casual</button>
+          </div>
+        ` : ''}
+  
         <!-- Curated Proxy Cards Grid -->
         ${filtered.length > 0 ? `
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            ${filtered.map(proxy => {
+            ${filtered.slice(0, state.visibleLimit).map(proxy => {
               const char = CHARACTERS[proxy.character] || CHARACTERS.Gumball;
               const isFav = state.favorites.includes(proxy.id);
               return `
-                <div data-proxy-id="${proxy.id}" class="proxy-card group relative flex flex-col bg-slate-900/80 border border-slate-800 hover:border-cyan-500/60 rounded-xl p-5 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-950/40">
-                  <div class="flex items-start justify-between gap-3 mb-3">
-                    <div class="flex items-center gap-2">
-                      <span class="text-2xl">${char.avatar}</span>
-                      <div>
-                        <div class="text-[11px] font-mono font-bold ${char.color}">
-                          ${char.name} Approved
-                        </div>
-                        <h3 class="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
-                          ${proxy.title}
-                        </h3>
+                <div data-proxy-id="${proxy.id}" class="proxy-card group relative flex flex-col bg-slate-900/80 border border-slate-800 hover:border-cyan-500/60 rounded-xl overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-950/40">
+                  ${proxy.image ? `
+                    <div class="relative w-full h-36 overflow-hidden bg-slate-950">
+                      <img src="${proxy.image}" alt="${proxy.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+                      <div class="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-md text-[11px] font-bold text-cyan-400 border border-cyan-500/30">
+                        <span>⚡</span>
+                        <span>FEATURED STUNT</span>
                       </div>
                     </div>
+                  ` : ''}
 
-                    <button data-fav-id="${proxy.id}" class="card-fav-btn p-1.5 rounded-lg text-slate-400 hover:text-amber-400 transition-colors" title="${isFav ? 'Remove bookmark' : 'Bookmark portal'}">
-                      <span class="${isFav ? 'text-amber-400' : 'text-slate-600'}">★</span>
-                    </button>
-                  </div>
+                  <div class="p-5 flex flex-col flex-1">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                      <div class="flex items-center gap-2">
+                        <span class="text-2xl">${char.avatar}</span>
+                        <div>
+                          <div class="text-[11px] font-mono font-bold ${char.color}">
+                            ${char.name} Approved
+                          </div>
+                          <h3 class="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+                            ${proxy.title}
+                          </h3>
+                        </div>
+                      </div>
 
-                  <p class="text-xs text-slate-300 leading-relaxed mb-4 flex-1">
-                    ${proxy.description}
-                  </p>
+                      <button data-fav-id="${proxy.id}" class="card-fav-btn p-1.5 rounded-lg text-slate-400 hover:text-amber-400 transition-colors" title="${isFav ? 'Remove bookmark' : 'Bookmark portal'}">
+                        <span class="${isFav ? 'text-amber-400' : 'text-slate-600'}">★</span>
+                      </button>
+                    </div>
 
-                  <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs font-mono">
-                    <span class="text-slate-400">${proxy.category}</span>
-                    <button class="px-3 py-1 bg-cyan-950/60 border border-cyan-800/80 text-cyan-300 group-hover:bg-cyan-500 group-hover:text-slate-950 font-bold rounded-md transition-colors">
-                      Launch Iframe →
-                    </button>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-4 flex-1">
+                      ${proxy.description}
+                    </p>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs font-mono">
+                      <span class="text-slate-400">${proxy.category}</span>
+                      <button class="px-3 py-1 bg-cyan-950/60 border border-cyan-800/80 text-cyan-300 group-hover:bg-cyan-500 group-hover:text-slate-950 font-bold rounded-md transition-colors">
+                        Launch Iframe →
+                      </button>
+                    </div>
                   </div>
                 </div>
               `;
             }).join('')}
+          
+            ${filtered.length > state.visibleLimit ? `
+              <div class="col-span-full py-6 flex justify-center">
+                <button id="btn-load-more" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-cyan-500/50 text-cyan-300 font-bold text-xs rounded-xl shadow-lg transition-all hover:scale-105">
+                  Load More Portals (${Math.min(state.visibleLimit, filtered.length)} of ${filtered.length} shown) ↓
+                </button>
+              </div>
+            ` : ''}
           </div>
+  
         ` : `
           <div class="py-16 text-center bg-slate-900/30 border border-slate-800/80 rounded-2xl p-6">
             <span class="text-4xl mb-3 block">🐱</span>
@@ -554,7 +626,7 @@ function renderProxyModalHtml(proxy) {
           <div class="flex items-center gap-3">
             <span class="text-emerald-400 font-bold">🛡️ Anti-Popup Active</span>
             <span aria-hidden="true" class="text-slate-700">·</span>
-            <span>Original 3D Engine · 100 Stages</span>
+            <span>Elmore Unblocked Gateway</span>
           </div>
         </div>
       </div>
@@ -718,9 +790,21 @@ function attachMainEvents() {
     });
   });
 
-  document.getElementById('hero-play-featured')?.addEventListener('click', () => {
-    const featured = state.proxies.find(p => p.featured) || state.proxies[0];
-    if (featured) launchProxy(featured);
+  document.getElementById('hero-play-bull33')?.addEventListener('click', () => {
+    state.activeCategory = 'Bull-33 Games';
+    state.favoritesOnly = false;
+    state.searchQuery = '';
+    render();
+  });
+
+  document.getElementById('hero-play-surron')?.addEventListener('click', () => {
+    const surron = state.proxies.find(p => p.id === 'surron-wheelies');
+    if (surron) launchProxy(surron);
+  });
+
+  document.getElementById('hero-play-drivemad')?.addEventListener('click', () => {
+    const drivemad = state.proxies.find(p => p.id === 'drivemad');
+    if (drivemad) launchProxy(drivemad);
   });
 
   // Omnibar Form Submit
@@ -784,6 +868,20 @@ function attachMainEvents() {
   });
 
   // Proxy Card Click
+  
+  document.querySelectorAll('.btn-bull33-genre').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.bull33Genre = btn.dataset.bgenre;
+      state.visibleLimit = 36;
+      render();
+    });
+  });
+
+  document.getElementById('btn-load-more')?.addEventListener('click', () => {
+    state.visibleLimit += 36;
+    render();
+  });
+  
   document.querySelectorAll('.proxy-card').forEach(card => {
     card.addEventListener('click', (e) => {
       if (e.target.closest('.card-fav-btn')) return;

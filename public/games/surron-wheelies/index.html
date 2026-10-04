@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Scratch Sur-Ron Wheelie Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background: #111827;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 960px;
+      max-height: 720px;
+      aspect-ratio: 4 / 3;
+      background: #70d6ff;
+      overflow: hidden;
+      border: 3px solid #000;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Top Scratch Header Bar (Like Scratch player in photo) */
+    .scratch-nav {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 42px;
+      background: #f1f5f9;
+      border-bottom: 2px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      z-index: 40;
+    }
+    .scratch-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .green-flag {
+      width: 24px;
+      height: 24px;
+      background: #22c55e;
+      border: 2px solid #16a34a;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #fff;
+      transition: transform 0.1s;
+    }
+    .green-flag:active {
+      transform: scale(0.9);
+    }
+    .red-stop {
+      width: 24px;
+      height: 24px;
+      background: #ef4444;
+      border: 2px solid #dc2626;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #fff;
+    }
+
+    /* Exact Orange Variable Score Box in Top Right (like in photo: 659...) */
+    .scratch-var-box {
+      background: #f97316;
+      border: 3px solid #ea580c;
+      color: #ffffff;
+      padding: 4px 16px;
+      border-radius: 8px;
+      font-size: 22px;
+      font-weight: 900;
+      font-family: monospace;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+
+    /* Floating Stunt Banner */
+    .stunt-banner {
+      position: absolute;
+      top: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: rgba(15, 23, 42, 0.9);
+      border: 2px solid #facc15;
+      padding: 6px 20px;
+      border-radius: 9999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 30;
+    }
+    .stunt-banner.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(4px);
+    }
+
+    /* Bottom Stunt & Control Keys Bar */
+    .stunt-bar {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 35;
+      pointer-events: auto;
+    }
+    .btn-key {
+      background: rgba(15, 23, 42, 0.88);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      transition: all 0.1s;
+      min-width: 82px;
+      touch-action: manipulation;
+    }
+    .btn-key .label {
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .btn-key .sub {
+      font-size: 10px;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+    .btn-key:active, .btn-key.active {
+      background: #facc15;
+      color: #020617;
+      border-color: #facc15;
+      transform: scale(0.93);
+    }
+    .btn-key.active .sub {
+      color: #020617;
+    }
+
+    /* Touch Pedals (Left / Right) */
+    .touch-left {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      display: flex;
+      gap: 8px;
+      z-index: 35;
+      pointer-events: auto;
+    }
+    .touch-right {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      display: flex;
+      gap: 8px;
+      z-index: 35;
+      pointer-events: auto;
+    }
+    .pad-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 900;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: all 0.1s;
+    }
+    .pad-btn .small {
+      font-size: 9px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-top: -2px;
+    }
+    .pad-btn:active, .pad-btn.active {
+      transform: scale(0.92);
+    }
+    .pad-gas.active {
+      background: #22c55e;
+      color: #020617;
+    }
+    .pad-brake.active {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    /* Looping Out Crash Overlay */
+    .loop-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      text-align: center;
+      padding: 20px;
+    }
+    .loop-box {
+      background: #ffffff;
+      border: 4px solid #ef4444;
+      border-radius: 16px;
+      padding: 28px 36px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      max-width: 400px;
+      width: 100%;
+      color: #0f172a;
+    }
+    .loop-box h2 {
+      font-size: 32px;
+      font-weight: 900;
+      color: #ef4444;
+      margin-bottom: 6px;
+    }
+    .loop-box p {
+      font-size: 13px;
+      color: #475569;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .btn-restart {
+      margin-top: 18px;
+      width: 100%;
+      background: #ef4444;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+      transition: all 0.15s;
+    }
+    .btn-restart:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <!-- Scratch Top Bar -->
+    <div class="scratch-nav">
+      <div class="scratch-controls">
+        <button id="btnGreenFlag" class="green-flag" title="Restart / Green Flag">▶</button>
+        <button id="btnRedStop" class="red-stop" title="Stop">■</button>
+        <span style="font-size: 12px; font-weight: 800; color: #475569; margin-left: 6px;">Sur-Ron Wheelie</span>
+      </div>
+
+      <!-- Scratch Orange Score Variable -->
+      <div class="scratch-var-box" id="scratchVarBox">
+        0
+      </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="stunt-banner" id="stuntBanner">HAND DRAG! +500</div>
+
+    <!-- Middle Stunts Bar -->
+    <div class="stunt-bar">
+      <button id="btnHandDrag" class="btn-key">
+        <span class="label">✋ Hand Drag</span>
+        <span class="sub">[H]</span>
+      </button>
+      <button id="btnKneeKnock" class="btn-key">
+        <span class="label">🦵 Knee Knock</span>
+        <span class="sub">[K]</span>
+      </button>
+      <button id="btnSeatStand" class="btn-key">
+        <span class="label">🧍 Seat Stand</span>
+        <span class="sub">[S]</span>
+      </button>
+    </div>
+
+    <!-- Touch Pedals -->
+    <div class="touch-left">
+      <button id="btnLeanBack" class="pad-btn">
+        <span>↶</span>
+        <span class="small">[A]</span>
+      </button>
+      <button id="btnLeanFwd" class="pad-btn">
+        <span>↷</span>
+        <span class="small">[D]</span>
+      </button>
+    </div>
+
+    <div class="touch-right">
+      <button id="btnBrake" class="pad-btn pad-brake">
+        <span>🛑</span>
+        <span class="small">[↓]</span>
+      </button>
+      <button id="btnGas" class="pad-btn pad-gas">
+        <span>⚡</span>
+        <span class="small">[↑]</span>
+      </button>
+    </div>
+
+    <!-- Looped Out Crash Modal -->
+    <div id="loopOverlay" class="loop-overlay">
+      <div class="loop-box">
+        <div style="font-size: 48px; margin-bottom: 4px;">🔄💥</div>
+        <h2>LOOPED OUT!</h2>
+        <p>
+          You went too far back past 12 o'clock! Tap the brake <strong>[Space / ↓]</strong> to bring the front wheel down next time.
+        </p>
+
+        <div style="margin-top: 14px; background: #f8fafc; border: 2px solid #e2e8f0; padding: 10px; border-radius: 10px; display: flex; justify-content: space-around;">
+          <div>
+            <div style="font-size: 11px; color: #64748b; font-weight: 800;">SCORE</div>
+            <div style="font-size: 20px; font-weight: 900; color: #ea580c;" id="finalScoreVal">0</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #64748b; font-weight: 800;">DISTANCE</div>
+            <div style="font-size: 20px; font-weight: 900; color: #0f172a;" id="finalDistVal">0 m</div>
+          </div>
+        </div>
+
+        <button id="btnRespawn" class="btn-restart">Ride Again [Space / Green Flag]</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * EXACT SCRATCH SUR-RON WHEELIE GAME ENGINE
+     * 100% Faithful to the user's uploaded image:
+     * - Soft violet/pink to sky-blue gradient sky
+     * - Flat deep blue ocean stripe
+     * - Vibrant lime green palm trees with curved brown trunks
+     * - Light slate-grey road with bold bright-yellow rectangular dashed lane markings
+     * - Exact Sur-Ron red angular frame, black battery core, red swingarm, black seat, and front forks
+     * - Exact rider in light-blue t-shirt, dark shorts, peach skin tone, and grey shoes
+     * - Full Looping Feature:
+     *   When wheelie angle exceeds 88°, the bike flips backwards over the rear wheel,
+     *   the rider flies off backwards and slides across the road, with restart prompt!
+     */
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('game-container');
+
+    // Audio Engine
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let motorOsc = null;
+    let motorGain = null;
+
+    function initAudio() {
+      if (!audioCtx && AudioCtx) {
+        audioCtx = new AudioCtx();
+        motorOsc = audioCtx.createOscillator();
+        motorGain = audioCtx.createGain();
+        motorOsc.type = 'sawtooth';
+        motorOsc.frequency.setValueAtTime(65, audioCtx.currentTime);
+        motorGain.gain.setValueAtTime(0, audioCtx.currentTime);
+        motorOsc.connect(motorGain);
+        motorGain.connect(audioCtx.destination);
+        motorOsc.start();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function updateMotorAudio(throttleOn, rpmRatio) {
+      if (!audioCtx || !motorGain) return;
+      const now = audioCtx.currentTime;
+      const freq = 100 + rpmRatio * 440;
+      motorOsc.frequency.setTargetAtTime(freq, now, 0.04);
+      const vol = throttleOn ? (0.04 + rpmRatio * 0.05) : (rpmRatio > 0.1 ? 0.015 : 0.0);
+      motorGain.gain.setTargetAtTime(vol, now, 0.04);
+    }
+
+    function playSound(type) {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      if (type === 'chime') {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(587, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+        g.gain.setValueAtTime(0.12, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'loopCrash') {
+        if (motorGain) motorGain.gain.setValueAtTime(0, now);
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.45);
+        g.gain.setValueAtTime(0.3, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      }
+    }
+
+    // Geometry
+    let width = 800;
+    let height = 600;
+    function resize() {
+      const rect = container.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Controls
+    const input = {
+      gas: false,
+      brake: false,
+      leanBack: false,
+      leanFwd: false,
+      handDrag: false,
+      kneeKnock: false,
+      seatStand: false
+    };
+
+    window.addEventListener('keydown', (e) => {
+      initAudio();
+      if (['ArrowUp', 'KeyW'].includes(e.code)) input.gas = true;
+      if (['ArrowDown', 'Space'].includes(e.code)) {
+        input.brake = true;
+        e.preventDefault();
+      }
+      if (['ArrowLeft', 'KeyA'].includes(e.code)) input.leanBack = true;
+      if (['ArrowRight', 'KeyD'].includes(e.code)) input.leanFwd = true;
+
+      if (e.code === 'KeyH') { input.handDrag = true; updateButtons(); }
+      if (e.code === 'KeyK') { input.kneeKnock = true; updateButtons(); }
+      if (e.code === 'KeyS' || e.code === 'KeyE') { input.seatStand = true; updateButtons(); }
+
+      if (e.code === 'KeyR' || (e.code === 'Space' && (gameState === 'LOOPING' || gameState === 'LOOPED'))) {
+        restartGame();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (['ArrowUp', 'KeyW'].includes(e.code)) input.gas = false;
+      if (['ArrowDown', 'Space'].includes(e.code)) input.brake = false;
+      if (['ArrowLeft', 'KeyA'].includes(e.code)) input.leanBack = false;
+      if (['ArrowRight', 'KeyD'].includes(e.code)) input.leanFwd = false;
+
+      if (e.code === 'KeyH') { input.handDrag = false; updateButtons(); }
+      if (e.code === 'KeyK') { input.kneeKnock = false; updateButtons(); }
+      if (e.code === 'KeyS' || e.code === 'KeyE') { input.seatStand = false; updateButtons(); }
+    });
+
+    function bindTouch(btnId, key) {
+      const el = document.getElementById(btnId);
+      if (!el) return;
+      const start = (e) => {
+        e.preventDefault();
+        initAudio();
+        input[key] = true;
+        el.classList.add('active');
+      };
+      const end = (e) => {
+        e.preventDefault();
+        input[key] = false;
+        el.classList.remove('active');
+      };
+      el.addEventListener('touchstart', start, { passive: false });
+      el.addEventListener('touchend', end, { passive: false });
+      el.addEventListener('mousedown', start);
+      el.addEventListener('mouseup', end);
+      el.addEventListener('mouseleave', end);
+    }
+
+    bindTouch('btnGas', 'gas');
+    bindTouch('btnBrake', 'brake');
+    bindTouch('btnLeanBack', 'leanBack');
+    bindTouch('btnLeanFwd', 'leanFwd');
+    bindTouch('btnHandDrag', 'handDrag');
+    bindTouch('btnKneeKnock', 'kneeKnock');
+    bindTouch('btnSeatStand', 'seatStand');
+
+    function updateButtons() {
+      document.getElementById('btnHandDrag')?.classList.toggle('active', input.handDrag);
+      document.getElementById('btnKneeKnock')?.classList.toggle('active', input.kneeKnock);
+      document.getElementById('btnSeatStand')?.classList.toggle('active', input.seatStand);
+    }
+
+    // State
+    let gameState = 'RIDING'; // 'RIDING', 'LOOPING', 'LOOPED'
+    let score = 0;
+    let wheelieDistance = 0;
+    let longestWheelie = 0;
+    let cameraX = 0;
+    let bike = null;
+    let fallenRider = null;
+
+    // Ragdoll Fallen Rider when Looping Out
+    class LoopedRider {
+      constructor(x, y, vx, vy) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.angle = 0;
+        this.rotSpeed = -0.16;
+      }
+      update(groundY) {
+        this.vy += 0.48; // gravity
+        this.x += this.vx;
+        this.y += this.vy;
+        this.angle += this.rotSpeed;
+
+        if (this.y >= groundY - 12) {
+          this.y = groundY - 12;
+          this.vy = 0;
+          this.vx *= 0.92; // friction
+          this.rotSpeed *= 0.75;
+        }
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+
+        // Torso: Light Blue Shirt (matching photo)
+        ctx.fillStyle = '#a2c4e0';
+        ctx.beginPath();
+        ctx.roundRect(-14, -8, 28, 16, 4);
+        ctx.fill();
+
+        // Head: Peach Geometric Polygon
+        ctx.fillStyle = '#f09a5b';
+        ctx.beginPath();
+        ctx.moveTo(14, -6);
+        ctx.lineTo(26, -14);
+        ctx.lineTo(28, 4);
+        ctx.lineTo(16, 6);
+        ctx.closePath();
+        ctx.fill();
+
+        // Shorts: Dark Charcoal
+        ctx.fillStyle = '#2b333a';
+        ctx.fillRect(-22, -6, 12, 12);
+
+        // Shoes: Grey
+        ctx.fillStyle = '#5b6770';
+        ctx.fillRect(-28, -4, 8, 8);
+
+        ctx.restore();
+      }
+    }
+
+    // SUR-RON BIKE ENTITY (PIXEL-ACCURATE VECTOR RENDERING OF PHOTO)
+    class ExactSurRonBike {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = 0;
+        this.vy = 0;
+        this.angle = 0; // pitch in radians
+        this.angularVel = 0;
+
+        // Geometry dimensions matching photo
+        this.wheelBase = 160;
+        this.wheelRadius = 34;
+        this.innerRimRadius = 20;
+        this.rearRot = 0;
+        this.frontRot = 0;
+
+        // Colors directly sampled from photo
+        this.colorFrame = '#ff1e1e';    // Bright red frame
+        this.colorBattery = '#11161d';  // Black angular battery
+        this.colorSeat = '#11161d';     // Black seat
+        this.colorForkUpper = '#282e36';// Dark grey upper fork
+        this.colorForkLower = '#ff1e1e';// Red lower fork
+        this.colorTire = '#181b20';     // Black outer tire
+        this.colorRim = '#8ea1b0';      // Grey inner rim
+
+        // Stunt states
+        this.stuntHandDrag = 0;
+        this.stuntKneeKnock = 0;
+        this.stuntSeatStand = 0;
+
+        this.sparks = [];
+        this.looped = false;
+      }
+
+      update(groundLevel) {
+        if (gameState === 'LOOPING') {
+          // Backward flip and pavement skid during loop out
+          this.angularVel += 0.005;
+          this.angle += this.angularVel;
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vy += 0.45;
+          this.vx *= 0.94;
+
+          if (this.y >= groundLevel - 24) {
+            this.y = groundLevel - 24;
+            this.vy = 0;
+            this.angularVel *= 0.65;
+          }
+
+          if (Math.abs(this.vx) > 0.8) {
+            this.sparks.push({
+              x: this.x - Math.cos(this.angle) * 50,
+              y: groundLevel - 2,
+              vx: -this.vx * 0.4 - Math.random() * 4,
+              vy: -Math.random() * 2.5,
+              alpha: 1
+            });
+          }
+
+          if (Math.abs(this.vx) < 0.2 && Math.abs(this.angularVel) < 0.01) {
+            gameState = 'LOOPED';
+            document.getElementById('loopOverlay').style.display = 'flex';
+          }
+
+          this.updateSparks();
+          return;
+        }
+
+        if (gameState !== 'RIDING') return;
+
+        const gravity = 0.46;
+        const drag = 0.99;
+        const angularDamping = 0.92;
+
+        this.vy += gravity;
+
+        // Acceleration
+        if (input.gas) {
+          this.vx += 0.40;
+          this.angularVel += 0.0042;
+          this.rearRot += 0.35;
+          this.frontRot += 0.35;
+        }
+
+        // Rear Brake (Pulls front wheel down immediately)
+        if (input.brake) {
+          this.vx *= 0.93;
+          if (this.angle > 0.04) {
+            this.angularVel -= 0.0085;
+          }
+          this.rearRot *= 0.88;
+        }
+
+        // Lean Controls
+        if (input.leanBack) {
+          this.angularVel += 0.0048;
+        }
+        if (input.leanFwd) {
+          this.angularVel -= 0.0055;
+        }
+
+        // Front end gravity pull when elevated
+        if (this.angle > 0.04) {
+          this.angularVel -= 0.0019;
+        }
+
+        // Damping
+        this.vx *= drag;
+        this.vy *= 0.99;
+        this.angularVel *= angularDamping;
+        this.vx = Math.min(this.vx, 22);
+
+        this.x += this.vx;
+        this.y += this.vy;
+        this.angle += this.angularVel;
+
+        if (this.angle < 0) {
+          this.angle = 0;
+          this.angularVel = 0;
+        }
+
+        // Ground Collision on Rear Axle
+        if (this.y >= groundLevel - this.wheelRadius) {
+          this.y = groundLevel - this.wheelRadius;
+          this.vy = 0;
+        }
+
+        const angleDeg = this.angle * (180 / Math.PI);
+
+        // --- LOOPING FEATURE: WHEN YOU GO TOO FAR BACK (> 88°) ---
+        if (angleDeg > 88) {
+          this.triggerLoopOut(groundLevel);
+          return;
+        }
+
+        // Stunts & Score
+        const inWheelie = angleDeg >= 22;
+        let activeStunt = null;
+
+        if (inWheelie) {
+          wheelieDistance += this.vx * 0.055;
+          longestWheelie = Math.max(longestWheelie, wheelieDistance);
+          score += Math.round(5 + angleDeg * 0.2);
+
+          if (input.handDrag) {
+            activeStunt = 'HAND DRAG';
+            score += 15;
+            this.sparks.push({
+              x: this.x - 40,
+              y: groundLevel - 2,
+              vx: -this.vx * 0.4 - Math.random() * 4,
+              vy: -Math.random() * 2,
+              alpha: 1
+            });
+          } else if (input.kneeKnock) {
+            activeStunt = 'KNEE KNOCK';
+            score += 20;
+          } else if (input.seatStand) {
+            activeStunt = 'SEAT STAND';
+            score += 25;
+          }
+        } else {
+          wheelieDistance = 0;
+        }
+
+        if (activeStunt) {
+          showBanner(activeStunt);
+        }
+
+        // Stunt blending
+        const blendRate = 0.18;
+        this.stuntHandDrag += ((activeStunt === 'HAND DRAG' ? 1 : 0) - this.stuntHandDrag) * blendRate;
+        this.stuntKneeKnock += ((activeStunt === 'KNEE KNOCK' ? 1 : 0) - this.stuntKneeKnock) * blendRate;
+        this.stuntSeatStand += ((activeStunt === 'SEAT STAND' ? 1 : 0) - this.stuntSeatStand) * blendRate;
+
+        this.updateSparks();
+        updateMotorAudio(input.gas, this.vx / 22);
+      }
+
+      triggerLoopOut(groundLevel) {
+        if (gameState === 'LOOPING' || gameState === 'LOOPED') return;
+        gameState = 'LOOPING';
+        this.looped = true;
+        playSound('loopCrash');
+
+        this.angularVel = 0.14; // flips backwards
+
+        // Rider flies backwards off bike onto the street
+        fallenRider = new LoopedRider(
+          this.x - 30,
+          this.y - 40,
+          this.vx * 0.65 - 3,
+          -4
+        );
+
+        document.getElementById('finalScoreVal').innerText = score.toLocaleString();
+        document.getElementById('finalDistVal').innerText = Math.round(longestWheelie) + ' m';
+      }
+
+      updateSparks() {
+        this.sparks.forEach(s => {
+          s.x += s.vx;
+          s.y += s.vy;
+          s.vy += 0.3;
+          s.alpha -= 0.05;
+        });
+        this.sparks = this.sparks.filter(s => s.alpha > 0);
+      }
+
+      draw(ctx, groundLevel) {
+        // Draw sparks
+        this.sparks.forEach(s => {
+          ctx.fillStyle = `rgba(255, 235, 70, ${s.alpha})`;
+          ctx.fillRect(s.x, s.y, 3, 3);
+        });
+
+        // Draw Fallen Rider if looping out
+        if (fallenRider) {
+          fallenRider.update(groundLevel);
+          fallenRider.draw(ctx);
+        }
+
+        ctx.save();
+        const pivotX = this.x - 70; // Pivot at rear axle
+        const pivotY = this.y;
+
+        ctx.translate(pivotX, pivotY);
+        ctx.rotate(-this.angle);
+
+        // --- DRAW EXACT SUR-RON BIKE AS IN PHOTO (images (2).jpg) ---
+
+        // 1. REAR WHEEL (Black tire, grey inner rim, red axle hub)
+        this.drawExactWheel(ctx, 0, 0, this.rearRot);
+
+        // 2. RED REAR SWINGARM (Geometric red truss from axle to frame)
+        ctx.fillStyle = this.colorFrame;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);       // Rear axle
+        ctx.lineTo(36, 8);
+        ctx.lineTo(60, -18);
+        ctx.lineTo(32, -26);
+        ctx.closePath();
+        ctx.fill();
+
+        // 3. BLACK SEAT WITH ANGLED RED REAR WING
+        ctx.fillStyle = this.colorSeat;
+        ctx.beginPath();
+        ctx.moveTo(14, -46);
+        ctx.lineTo(84, -46);
+        ctx.lineTo(92, -34);
+        ctx.lineTo(28, -34);
+        ctx.closePath();
+        ctx.fill();
+
+        // Red Tail Wing Tip
+        ctx.fillStyle = this.colorFrame;
+        ctx.beginPath();
+        ctx.moveTo(14, -46);
+        ctx.lineTo(0, -50);
+        ctx.lineTo(12, -38);
+        ctx.closePath();
+        ctx.fill();
+
+        // 4. MAIN RED TWIN-BEAM SUR-RON FRAME
+        ctx.fillStyle = this.colorFrame;
+        ctx.beginPath();
+        ctx.moveTo(78, -48);
+        ctx.lineTo(124, -66); // Head tube
+        ctx.lineTo(118, -40); // Bottom of head tube
+        ctx.lineTo(108, -20); // Down tube
+        ctx.lineTo(86, 6);    // Bottom cradle
+        ctx.lineTo(64, -14);  // Swingarm pivot
+        ctx.lineTo(64, -40);  // Mid seat tube
+        ctx.closePath();
+        ctx.fill();
+
+        // 5. BLACK ANGULAR BATTERY COMPARTMENT (Enclosed in red frame)
+        ctx.fillStyle = this.colorBattery;
+        ctx.beginPath();
+        ctx.moveTo(82, -40);
+        ctx.lineTo(110, -52);
+        ctx.lineTo(102, -26);
+        ctx.lineTo(88, -2);
+        ctx.closePath();
+        ctx.fill();
+
+        // 6. FRONT FORK (Dark grey upper stanchion + Red lower leg)
+        ctx.strokeStyle = this.colorForkUpper;
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(124, -68);
+        ctx.lineTo(158, -12);
+        ctx.stroke();
+
+        ctx.strokeStyle = this.colorForkLower;
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(150, -26);
+        ctx.lineTo(172, 14);
+        ctx.stroke();
+
+        // 7. FRONT WHEEL (at local coordinates [172, 14])
+        this.drawExactWheel(ctx, 172, 14, this.frontRot);
+
+        // 8. BLACK HANDLEBAR & GRIP
+        ctx.fillStyle = '#11161d';
+        ctx.beginPath();
+        ctx.arc(118, -76, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // --- DRAW EXACT RIDER AS IN PHOTO (images (2).jpg) ---
+        if (!this.looped) {
+          this.drawExactRider(ctx, groundLevel, pivotY);
+        }
+
+        ctx.restore();
+      }
+
+      drawExactWheel(ctx, wx, wy, rot) {
+        ctx.save();
+        ctx.translate(wx, wy);
+
+        // Solid Black Outer Tire
+        ctx.fillStyle = this.colorTire;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.wheelRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Inner Grey Rim
+        ctx.fillStyle = this.colorRim;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.innerRimRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Small Red Axle Hub (Exact as in photo)
+        ctx.fillStyle = this.colorFrame;
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      drawExactRider(ctx, groundLevel, pivotY) {
+        const isHandDrag = this.stuntHandDrag > 0.4;
+        const isKneeKnock = this.stuntKneeKnock > 0.4;
+        const isSeatStand = this.stuntSeatStand > 0.4;
+
+        let hipX = 58;
+        let hipY = -48;
+        let headX = 76;
+        let headY = -122;
+        let footX = 66;
+        let footY = -16;
+        let handX = 118;
+        let handY = -76;
+
+        if (isSeatStand) {
+          // Standing tall on top of the seat!
+          footX = 44;
+          footY = -48;
+          hipX = 52;
+          hipY = -102;
+          headX = 66;
+          headY = -176;
+        } else if (isKneeKnock) {
+          // Knees high on handlebar!
+          footX = 104;
+          footY = -68;
+          hipX = 62;
+          hipY = -48;
+          headX = 94;
+          headY = -122;
+        } else if (isHandDrag) {
+          // Dropped low dragging hand on asphalt!
+          hipX = 36;
+          hipY = -40;
+          headX = 32;
+          headY = -94;
+        }
+
+        // 1. LEGS (Dark Shorts, Bare Peach Lower Leg, Grey Shoe)
+        ctx.strokeStyle = '#2b333a'; // Dark Charcoal Shorts
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(hipX, hipY);
+        ctx.lineTo(footX, footY - 12);
+        ctx.stroke();
+
+        // Bare Peach Calves
+        ctx.strokeStyle = '#f09a5b';
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(footX, footY - 14);
+        ctx.lineTo(footX, footY);
+        ctx.stroke();
+
+        // Grey Shoe with Sole
+        ctx.fillStyle = '#5b6770';
+        ctx.beginPath();
+        ctx.roundRect(footX - 6, footY - 4, 18, 10, 3);
+        ctx.fill();
+
+        // 2. TORSO (Light Blue Crew-Neck T-Shirt)
+        ctx.save();
+        ctx.fillStyle = '#a2c4e0';
+        ctx.beginPath();
+        ctx.moveTo(hipX - 14, hipY);
+        ctx.lineTo(hipX + 14, hipY);
+        ctx.lineTo(hipX + 18, hipY - 50);
+        ctx.lineTo(hipX - 12, hipY - 50);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // 3. HEAD (Warm Peach Polygonal Head & Cap Shape)
+        ctx.fillStyle = '#f09a5b';
+        ctx.beginPath();
+        ctx.moveTo(headX - 12, headY);
+        ctx.lineTo(headX + 14, headY - 14);
+        ctx.lineTo(headX + 20, headY + 12);
+        ctx.lineTo(headX - 6, headY + 16);
+        ctx.closePath();
+        ctx.fill();
+
+        // 4. ARMS & HANDS (Peach skin tone reaching to black grip)
+        ctx.strokeStyle = '#f09a5b';
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(hipX + 14, hipY - 40);
+        ctx.lineTo(handX, handY);
+        ctx.stroke();
+
+        // Right arm for Hand Drag (reaches down to asphalt)
+        if (isHandDrag) {
+          const roadDist = (groundLevel - pivotY);
+          const localRoadY = roadDist * Math.cos(this.angle) + 4;
+          ctx.strokeStyle = '#f09a5b';
+          ctx.lineWidth = 8;
+          ctx.beginPath();
+          ctx.moveTo(hipX + 14, hipY - 38);
+          ctx.lineTo(hipX - 30, Math.max(-2, localRoadY));
+          ctx.stroke();
+
+          // Glove on road
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath();
+          ctx.arc(hipX - 30, Math.max(-2, localRoadY), 7, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    let stuntTimeout = null;
+    function showBanner(txt) {
+      const banner = document.getElementById('stuntBanner');
+      if (!banner) return;
+      banner.innerText = txt + '!';
+      banner.classList.add('show');
+      clearTimeout(stuntTimeout);
+      stuntTimeout = setTimeout(() => banner.classList.remove('show'), 800);
+    }
+
+    function restartGame() {
+      gameState = 'RIDING';
+      fallenRider = null;
+      score = 0;
+      wheelieDistance = 0;
+
+      const roadLevel = height * 0.72;
+      bike = new ExactSurRonBike(200, roadLevel - 34);
+      cameraX = bike.x - 280;
+
+      document.getElementById('loopOverlay').style.display = 'none';
+      document.getElementById('scratchVarBox').innerText = '0';
+    }
+
+    document.getElementById('btnGreenFlag').addEventListener('click', restartGame);
+    document.getElementById('btnRedStop').addEventListener('click', () => {
+      gameState = 'LOOPED';
+      document.getElementById('loopOverlay').style.display = 'flex';
+    });
+    document.getElementById('btnRespawn').addEventListener('click', restartGame);
+
+    // EXACT BACKGROUND FROM USER PHOTO (images (2).jpg)
+    function drawExactBackground() {
+      const roadY = height * 0.72;
+
+      // 1. SKY: Violet / Pink to Sky-Blue Gradient
+      const skyGrad = ctx.createLinearGradient(0, 42, 0, roadY * 0.62);
+      skyGrad.addColorStop(0, '#dfb4e6');   // Soft pale violet/pink
+      skyGrad.addColorStop(0.5, '#c5a3ec');
+      skyGrad.addColorStop(0.8, '#82cbf9'); // Sky blue
+      skyGrad.addColorStop(1, '#82cbf9');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 42, width, roadY * 0.62 - 42);
+
+      // 2. OCEAN: Flat Deep Blue Horizontal Stripe
+      const oceanY = roadY * 0.62;
+      const oceanH = roadY * 0.16;
+      ctx.fillStyle = '#0050c8'; // Deep blue sea
+      ctx.fillRect(0, oceanY, width, oceanH);
+
+      // 3. PALM TREES: Scratch Style (Brown curved trunk + Bright neon green fronds)
+      for (let i = -2; i < 14; i++) {
+        const px = ((i * 260 - cameraX * 0.45) % (width + 520)) - 120;
+        drawExactPalmTree(ctx, px, roadY);
+      }
+
+      // 4. ROAD: Flat Light Slate-Grey (Exact color from photo: #8ea1b0)
+      ctx.fillStyle = '#8ea1b0';
+      ctx.fillRect(0, roadY, width, height - roadY);
+
+      // Dark curb line
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(0, roadY, width, 4);
+
+      // 5. YELLOW DASH DIVIDER STRIPES (Exact bold rectangular bright yellow blocks)
+      ctx.fillStyle = '#ffe600'; // Bright Yellow
+      const dashW = 90;
+      const dashH = 22;
+      const dashGap = 90;
+      const period = dashW + dashGap;
+      const offset = (cameraX * 1.0) % period;
+      for (let x = -offset; x < width + period; x += period) {
+        ctx.fillRect(x, roadY + 48, dashW, dashH);
+      }
+    }
+
+    function drawExactPalmTree(ctx, x, y) {
+      // Curved Brown Trunk
+      ctx.strokeStyle = '#7d4e23';
+      ctx.lineWidth = 18;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.quadraticCurveTo(x + 16, y - 90, x + 6, y - 180);
+      ctx.stroke();
+
+      // Bright Green Palm Fronds (Vibrant Scratch neon green: #00d000)
+      ctx.fillStyle = '#00d000';
+      const topX = x + 6;
+      const topY = y - 180;
+
+      // 5 Palm Leaves
+      const angles = [-1.0, -0.5, 0, 0.5, 1.0];
+      angles.forEach(a => {
+        ctx.save();
+        ctx.translate(topX, topY);
+        ctx.rotate(a);
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(42, -26, 75, -6);
+        ctx.quadraticCurveTo(48, 16, 0, 0);
+        ctx.fill();
+
+        ctx.restore();
+      });
+    }
+
+    // MAIN GAME LOOP
+    function loop() {
+      ctx.clearRect(0, 0, width, height);
+      const roadLevel = height * 0.72;
+
+      if (bike) {
+        const targetCamX = bike.x - width * 0.35;
+        cameraX += (targetCamX - cameraX) * 0.14;
+      }
+
+      // Draw World
+      drawExactBackground();
+
+      // Draw Entities
+      ctx.save();
+      ctx.translate(-cameraX, 0);
+
+      if (bike) {
+        bike.update(roadLevel);
+        bike.draw(ctx, roadLevel);
+      }
+
+      ctx.restore();
+
+      // Update Scratch Variable Display in Top Right
+      if (bike) {
+        document.getElementById('scratchVarBox').innerText = score.toLocaleString();
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    // Launch
+    const roadLevel = height * 0.72;
+    bike = new ExactSurRonBike(200, roadLevel - 34);
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
