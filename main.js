@@ -9,39 +9,159 @@ const DEFAULT_PROXIES = [
   {
     id: "surron-wheelies",
     title: "Sur-Ron Wheelie King: Stunt Syndicate",
-    category: "Games",
+    category: "Chromebook Verified",
+    subCategory: "Action",
     character: "Darwin",
     accent: "#00b4d8",
     featured: true,
     image: "./assets/images/surron_wheelie_stunt_1791151626950.jpg",
-    description: "High-voltage electric dirt bike wheelie simulator! Balance the sweet spot, chain huge combos, and pull off Hand Drags, Knee Knocks, Seat Stands, and 12 O'Clock scrapes.",
+    description: "High-voltage electric dirt bike wheelie simulator! 100% local canvas, balance sweet spot, hand drags, and looping out physics. 100% Linewize proof.",
     url: "./games/surron-wheelies/index.html",
-    iframe: '<iframe src="./games/surron-wheelies/index.html" title="Sur-Ron Wheelie King: Stunt Syndicate" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
-    tags: ["Surron", "Wheelie", "Stunts", "Combos", "Hand Drag", "Knee Knock", "Seat Stand", "Games", "Physics"]
+    iframe: '<iframe src="./games/surron-wheelies/index.html" title="Sur-Ron Wheelie King" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Surron", "Wheelie", "Chromebook", "Unblockable", "Local", "Physics", "Stunts"]
   },
   {
     id: "drivemad",
     title: "Drive Mad: Original 3D",
-    category: "Games",
+    category: "Chromebook Verified",
+    subCategory: "Racing",
     character: "Richard",
     accent: "#f97316",
-    featured: false,
-    description: "The authentic original 3D voxel physics monster truck game by Martin Magni with all 100 levels. Includes Switch Mirror for multiple sources.",
+    featured: true,
+    description: "The authentic original 3D voxel physics monster truck game with all 100 levels. Now 100% self-contained locally with zero external dependencies.",
     url: "./games/drivemad/index.html",
-    originalUrl: "https://a.luminsdk.com/g/1791148304-s8-HyuYTCsFGsqB9NayM__pB29e8v3MlVjxrAcsV61M/selenite/drivemad/",
     iframe: '<iframe src="./games/drivemad/index.html" title="Drive Mad: Original 3D" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock" class="w-full h-full border-0"></iframe>',
-    tags: ["Drive Mad", "Original", "3D", "Games", "Physics", "Truck", "Switch Mirror"]
+    tags: ["Drive Mad", "Original", "3D", "Chromebook", "Unblockable", "Local", "Physics", "Truck"]
   },
   {
-    id: "duckduckgo",
-    title: "DuckDuckGo Privacy Search",
+    id: "duckduckgo-browser",
+    title: "Built-in DuckDuckGo Browser",
     category: "Search",
+    subCategory: "Browser",
     character: "Anais",
-    accent: "#00b4d8",
-    description: "Anais's recommended untracked search engine. Query the web without Miss Simian snooping on your browsing history.",
-    url: "https://html.duckduckgo.com/html/",
-    iframe: '<iframe src="https://html.duckduckgo.com/html/" title="DuckDuckGo Clean Search" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
-    tags: ["Search", "Privacy", "Web", "Untracked"]
+    accent: "#de5833",
+    featured: true,
+    description: "Full built-in private web browser powered by DuckDuckGo. Omnibar search, bookmarks bar, instant answers, and stealth about:blank cloaking.",
+    url: "./games/browser/index.html",
+    iframe: '<iframe src="./games/browser/index.html" title="DuckDuckGo Private Browser" allow="fullscreen; autoplay" sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock" class="w-full h-full border-0"></iframe>',
+    tags: ["DuckDuckGo", "Browser", "Search", "Privacy", "Chromebook", "Unblockable", "Stealth"]
+  },
+  {
+    id: "dino-run",
+    title: "Pixel Dino Run: Offline T-Rex",
+    category: "Chromebook Verified",
+    subCategory: "Arcade",
+    character: "Gumball",
+    accent: "#f59e0b",
+    featured: true,
+    description: "The legendary offline Chrome Dino runner! Jump over desert cacti and pterodactyls with day/night cycles and high score saving.",
+    url: "./games/dino-run/index.html",
+    iframe: '<iframe src="./games/dino-run/index.html" title="Pixel Dino Run" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Dino", "Runner", "Chromebook", "Unblockable", "Local", "Arcade"]
+  },
+  {
+    id: "flappy",
+    title: "Flappy Pixel Arcade",
+    category: "Chromebook Verified",
+    subCategory: "Arcade",
+    character: "Darwin",
+    accent: "#38bdf8",
+    featured: true,
+    description: "Classic retro bird flight! Tap space or touch screen to flap through green pipe obstacles with responsive physics.",
+    url: "./games/flappy/index.html",
+    iframe: '<iframe src="./games/flappy/index.html" title="Flappy Pixel" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Flappy", "Pixel", "Chromebook", "Unblockable", "Local", "Arcade"]
+  },
+  {
+    id: "snake",
+    title: "Retro Neon Snake",
+    category: "Chromebook Verified",
+    subCategory: "Arcade",
+    character: "Bobert",
+    accent: "#10b981",
+    featured: false,
+    description: "High-speed arcade snake with glowing neon visuals, particle effects, and responsive arrow / WASD grid movement.",
+    url: "./games/snake/index.html",
+    iframe: '<iframe src="./games/snake/index.html" title="Retro Neon Snake" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Snake", "Retro", "Neon", "Chromebook", "Unblockable", "Local"]
+  },
+  {
+    id: "tetris",
+    title: "Cyber Block Tetris",
+    category: "Chromebook Verified",
+    subCategory: "Puzzle",
+    character: "Anais",
+    accent: "#a855f7",
+    featured: false,
+    description: "Authentic block dropping puzzle game with instant drop, hold piece, line combo scoring, and progressive level speed.",
+    url: "./games/tetris/index.html",
+    iframe: '<iframe src="./games/tetris/index.html" title="Cyber Block Tetris" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Tetris", "Puzzle", "Blocks", "Chromebook", "Unblockable", "Local"]
+  },
+  {
+    id: "2048",
+    title: "2048 Neon Merge",
+    category: "Chromebook Verified",
+    subCategory: "Puzzle",
+    character: "Nicole",
+    accent: "#eab308",
+    featured: false,
+    description: "Slide and merge numbers to reach the legendary 2048 tile! Smooth animations, score tracking, and undo support.",
+    url: "./games/2048/index.html",
+    iframe: '<iframe src="./games/2048/index.html" title="2048 Neon Merge" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["2048", "Puzzle", "Math", "Chromebook", "Unblockable", "Local"]
+  },
+  {
+    id: "space-invaders",
+    title: "Retro Space Invaders",
+    category: "Chromebook Verified",
+    subCategory: "Shooting",
+    character: "Bobert",
+    accent: "#ef4444",
+    featured: false,
+    description: "Defend Earth from marching alien hordes! Classic retro arcade shooter with destructible shields and UFO bonuses.",
+    url: "./games/space-invaders/index.html",
+    iframe: '<iframe src="./games/space-invaders/index.html" title="Space Invaders" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Space Invaders", "Shooting", "Retro", "Chromebook", "Unblockable", "Local"]
+  },
+  {
+    id: "pong",
+    title: "Cyber Pong 2-Player & AI",
+    category: "Chromebook Verified",
+    subCategory: "Sports",
+    character: "Richard",
+    accent: "#06b6d4",
+    featured: false,
+    description: "The father of all video games! Play vs smart AI or battle a friend locally with 2-player split controls.",
+    url: "./games/pong/index.html",
+    iframe: '<iframe src="./games/pong/index.html" title="Cyber Pong" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Pong", "Retro", "Sports", "2-Player", "Chromebook", "Unblockable"]
+  },
+  {
+    id: "breakout",
+    title: "Arcade Brick Breaker",
+    category: "Chromebook Verified",
+    subCategory: "Arcade",
+    character: "Darwin",
+    accent: "#f43f5e",
+    featured: false,
+    description: "Smash through colored brick formations with ball physics, paddle control, and multiball powerups.",
+    url: "./games/breakout/index.html",
+    iframe: '<iframe src="./games/breakout/index.html" title="Arcade Brick Breaker" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Breakout", "Bricks", "Arcade", "Chromebook", "Unblockable", "Local"]
+  },
+  {
+    id: "minesweeper",
+    title: "Classic Minesweeper",
+    category: "Chromebook Verified",
+    subCategory: "Puzzle",
+    character: "Anais",
+    accent: "#64748b",
+    featured: false,
+    description: "Classic grid mine detection puzzle! Flag hidden mines, reveal safe numbers, and beat your best completion time.",
+    url: "./games/minesweeper/index.html",
+    iframe: '<iframe src="./games/minesweeper/index.html" title="Classic Minesweeper" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
+    tags: ["Minesweeper", "Puzzle", "Logic", "Chromebook", "Unblockable", "Local"]
   },
   {
     id: "wikipedia",
@@ -49,7 +169,7 @@ const DEFAULT_PROXIES = [
     category: "Reference",
     character: "Bobert",
     accent: "#38bdf8",
-    description: "Bobert's complete data repository. Millions of free encyclopedia articles on history, technology, and why Elmore defies physics.",
+    description: "Bobert's complete data repository. Millions of free encyclopedia articles on history, technology, and science.",
     url: "https://en.m.wikipedia.org",
     iframe: '<iframe src="https://en.m.wikipedia.org" title="Wikipedia Knowledge Base" allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" class="w-full h-full border-0"></iframe>',
     tags: ["Encyclopedia", "Research", "Education", "Wiki"]
@@ -247,8 +367,15 @@ function togglePanic() {
 
 function getFilteredProxies() {
   return state.proxies.filter(p => {
-    if (state.activeCategory !== 'all' && p.category !== state.activeCategory) {
-      return false;
+    if (state.activeCategory !== 'all') {
+      if (state.activeCategory === 'Chromebook Verified') {
+        if (p.category !== 'Chromebook Verified') return false;
+      } else if (state.activeCategory === 'Games') {
+        const isGame = p.category === 'Games' || p.category === 'Chromebook Verified' || (p.tags && p.tags.includes('Games'));
+        if (!isGame) return false;
+      } else if (p.category !== state.activeCategory) {
+        return false;
+      }
     }
     if (state.activeCategory === 'Bull-33 Games' && state.bull33Genre !== 'all') {
       const hasGenre = (p.tags || []).some(t => t.toLowerCase() === state.bull33Genre.toLowerCase()) || (p.subCategory && p.subCategory.toLowerCase() === state.bull33Genre.toLowerCase());
@@ -288,7 +415,7 @@ function render() {
   }
 
   const filtered = getFilteredProxies();
-  const categories = ['all', 'Bull-33 Games', 'Games', 'Search', 'Reference', 'Math & Tools', 'Creative', 'Archive'];
+  const categories = ['all', 'Chromebook Verified', 'Bull-33 Games', 'Games', 'Search', 'Reference', 'Math & Tools', 'Creative', 'Archive'];
   const surronGame = state.proxies.find(p => p.id === 'surron-wheelies') || state.proxies[0];
   const drivemadGame = state.proxies.find(p => p.id === 'drivemad');
 
@@ -379,31 +506,34 @@ function render() {
               </div>
             </form>
 
+            
             <div class="flex flex-wrap items-center gap-3">
-              ${surronGame ? `
-                <button id="hero-play-surron" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-300 to-emerald-300 hover:scale-[1.02] rounded-lg shadow-md transition-all">
-                  <span>⚡ Play Sur-Ron Wheelie King</span>
-                </button>
-              ` : ''}
+              <button id="hero-play-surron" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-300 to-emerald-300 hover:scale-[1.02] rounded-lg shadow-md transition-all">
+                <span>⚡ Sur-Ron Wheelie King</span>
+              </button>
 
-              <button id="hero-play-bull33" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 rounded-lg shadow-md transition-all hover:scale-[1.02]">
-      <span>🐂 Bull-33 Games (225+)</span>
-    </button>
+              <button id="hero-play-drivemad" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-500/50 rounded-lg shadow-md transition-all">
+                <span>🚚 Drive Mad 3D</span>
+              </button>
 
-              ${drivemadGame ? `
-                <button id="hero-play-drivemad" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-orange-500/50 rounded-lg shadow-md transition-all">
-                  <span>🚚 Play Drive Mad 3D</span>
-                </button>
-              ` : ''}
+              <button id="hero-play-browser" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-orange-600 to-rose-600 hover:from-orange-500 hover:to-rose-500 rounded-lg shadow-md transition-all hover:scale-[1.02]">
+                <span>🦆 DuckDuckGo Browser</span>
+              </button>
+
+              <button id="hero-play-bull33" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-cyan-300 bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/80 rounded-lg shadow-md transition-all">
+                <span>🐂 Bull-33 Games (225+)</span>
+              </button>
 
               <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
-                <span class="text-cyan-400">⚡ Client-Side Proxy</span>
+                <span class="text-emerald-400">🛡️ 100% Linewize Proof</span>
                 <span aria-hidden="true" class="text-slate-600">·</span>
-                <span class="text-orange-400">🛡️ Zero Popups</span>
+                <span class="text-cyan-400">⚡ Chromebook Ready</span>
               </div>
             </div>
+
           </div>
-        </section>
+        </div>
+      </section>
 
         <!-- Search & Filter Controls -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-800/80">
